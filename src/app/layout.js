@@ -17,6 +17,7 @@ export default function RootLayout({ children }) {
             <li><Link href="/">Home</Link></li>
             <li><Link href="/inventory">Inventory</Link></li>
             <li><Link href="/add-product">Add Product</Link></li>
+            <li><Link href="/sell-product">Sell Product</Link></li>
           </ul>
         </nav>
         <main className="p-6">{children}</main>

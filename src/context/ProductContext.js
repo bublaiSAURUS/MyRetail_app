@@ -14,7 +14,7 @@ export const ProductProvider = ({ children }) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
   return (
-    <ProductContext.Provider value={{ products, addProduct, deleteProduct}}>
+    <ProductContext.Provider value={{ products, addProduct, deleteProduct, setProducts}}>
       {children}
     </ProductContext.Provider>
   );
