@@ -13,20 +13,24 @@ export default function InventoryPage() {
         <table className="w-full table-auto border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100 dark:bg-gray-700">
+              <th className="p-2 border">Product ID</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Category</th>
               <th className="p-2 border">Price</th>
               <th className="p-2 border">Quantity</th>
+              <th className="p-2 border">Expiry Date</th>
               <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((prod) => (
               <tr key={prod.id}>
+                <td className="p-2 border">{prod.id}</td>
                 <td className="p-2 border">{prod.name}</td>
                 <td className="p-2 border">{prod.category}</td>
                 <td className="p-2 border">{prod.price}</td>
                 <td className="p-2 border">{prod.quantity}</td>
+                <td className="p-2 border">{prod.expiryDate}</td>
                 <td className="p-2 border">
                   <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => deleteProduct(prod.id)}>
                   Delete

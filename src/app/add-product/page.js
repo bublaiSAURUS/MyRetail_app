@@ -14,6 +14,7 @@ export default function AddProduct() {
     category: "",
     price: "",
     quantity: "",
+    expiryDate: "",
   });
 
   const handleChange = (e) => {
@@ -23,7 +24,7 @@ export default function AddProduct() {
   const handleSubmit = (e) => {
     e.preventDefault();
     addProduct({ ...form, id: Date.now() });
-    setForm({ name: "", category: "", price: "", quantity: "" });
+    setForm({ name: "", category: "", price: "", quantity: "",  expiryDate: ""});
     router.push("/inventory");
   };
 
@@ -64,6 +65,14 @@ export default function AddProduct() {
           name="quantity"
           placeholder="Quantity in Stock"
           value={form.quantity}
+          onChange={handleChange}
+          required
+        />
+        <input
+          className="border p-2 rounded text-black"
+          type="date"
+          name="expiryDate"
+          value={form.expiryDate}
           onChange={handleChange}
           required
         />

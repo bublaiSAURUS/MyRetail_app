@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function SellProductPage(){
 
-    const { products, setProducts } = useProductContext();
+    const { products, setProducts, recordSale } = useProductContext();
     const [selectedId, setSelectedId] = useState("");
     const [quantitySold, setQuantitySold] = useState("");
     const router = useRouter();
@@ -30,10 +30,19 @@ export default function SellProductPage(){
       quantity: product.quantity - quantitySold
     };
 
+
     const updatedProducts = [...products];
     updatedProducts[index] = updatedProduct;
 
     setProducts(updatedProducts);
+
+    recordSale({
+    productId: product.id,
+    productName: product.name,
+    quantity: quantitySold,
+    price: product.price,
+    });
+
     setSelectedId("");
     setQuantitySold("");
     router.push("/inventory");
