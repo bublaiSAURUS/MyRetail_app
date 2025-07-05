@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
-import { useProductContext } from "@/context/ProductContext";
+// import { useProductContext } from "@/context/ProductContext";
 import { useRouter } from "next/navigation";
 
 
 
 export default function AddProduct() {
 
-  const { addProduct } = useProductContext();
+  // const { addProduct } = useProductContext();
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -21,11 +21,29 @@ export default function AddProduct() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   addProduct({ ...form, id: Date.now() });
+  //   setForm({ name: "", category: "", price: "", quantity: "",  expiryDate: ""});
+  //   router.push("/inventory");
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addProduct({ ...form, id: Date.now() });
-    setForm({ name: "", category: "", price: "", quantity: "",  expiryDate: ""});
-    router.push("/inventory");
+
+    const res = await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    if (res.ok) {
+      alert("Product added!");
+      setForm({ name: "", category: "", price: "", quantity: "", expiryDate: "" });
+      router.push("/inventory");
+    } else {
+      alert("Failed to add product.");
+    }
   };
 
   return (
