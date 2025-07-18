@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useEmployeeContext } from "@/context/EmployeeContext";
 
 export default function EmployeesPage() {
-  const { employees, addEmployee } = useEmployeeContext();
+  const { employees, addEmployee, refreshEmployees, loading } = useEmployeeContext();
   const [showForm, setShowForm] = useState(false);
 
   const [form, setForm] = useState({
@@ -17,20 +17,53 @@ export default function EmployeesPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newEmployee = {
-      id: Date.now(),
       empId: form.empId,
       salary: parseFloat(form.salary),
       details: form.details,
     };
 
-    addEmployee(newEmployee);
-    setForm({ empId: "", salary: "", details: "" });
-    setShowForm(false); // hide form after submission
+    try {
+      const res = await fetch("/api/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          empID: parseInt(newEmployee.empId), // match DB column name
+          salary: newEmployee.salary,
+          perDetails: newEmployee.details,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add employee");
+
+      // Refresh the employees list from the database
+      refreshEmployees();
+
+      // Reset form & hide it
+      setForm({ empId: "", salary: "", details: "" });
+      setShowForm(false);
+      
+      alert("Employee added successfully!");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("There was an error adding the employee.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow-md text-black">
+        <h1 className="text-2xl font-bold mb-6 text-center">Employees</h1>
+        <p className="text-center">Loading employees...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow-md text-black">
@@ -50,11 +83,11 @@ export default function EmployeesPage() {
             </tr>
           </thead>
           <tbody>
-            {employees.map((emp) => (
-              <tr key={emp.id} className="text-black">
-                <td className="p-2 border">{emp.empId}</td>
+            {employees.map((emp, index) => (
+              <tr key={index} className="text-black">
+                <td className="p-2 border">{emp.empid}</td>
                 <td className="p-2 border">₹{emp.salary}</td>
-                <td className="p-2 border">{emp.details}</td>
+                <td className="p-2 border">{emp.perdetails}</td>
               </tr>
             ))}
           </tbody>
