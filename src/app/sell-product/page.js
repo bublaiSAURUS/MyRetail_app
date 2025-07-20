@@ -1,104 +1,84 @@
-"use client"
-
+"use client";
 import { useState } from "react";
-import { useProductContext } from "@/context/ProductContext";
-import { useRouter } from "next/navigation";
 
-export default function SellProductPage(){
+export default function SellProduct() {
+  const [productId, setProductId] = useState("");
+  const [sellQuantity, setSellQuantity] = useState("");
+  const [product, setProduct] = useState(null);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-    const { products, setProducts, recordSale } = useProductContext();
-    const [selectedId, setSelectedId] = useState("");
-    const [quantitySold, setQuantitySold] = useState("");
-    const router = useRouter();
-
-    const handleSell = (e) => {
-    e.preventDefault();
-
-    const isInventoryEmpty = products.length === 0;
-
-    const index = products.findIndex(p => p.id === parseInt(selectedId));
-    if (index == -1) return;
-    const product = products[index];
-    
-    if (quantitySold > product.quantity) {
-      alert("Not enough stock.");
-      return;
+  const fetchProduct = async () => {
+    const res = await fetch(`/api/products/${productId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setProduct(data);
+    } else {
+      alert("Product not found.");
     }
+  };
 
-    const updatedProduct = {
-      ...product,
-      quantity: product.quantity - quantitySold
-    };
+  const calculateTotal = () => {
+    if (product && sellQuantity) {
+      setTotalPrice(product.price * parseInt(sellQuantity));
+    }
+  };
 
-
-    const updatedProducts = [...products];
-    updatedProducts[index] = updatedProduct;
-
-    setProducts(updatedProducts);
-
-    recordSale({
-    productId: product.id,
-    productName: product.name,
-    quantity: quantitySold,
-    price: product.price,
+  const handleSell = async () => {
+    const res = await fetch(`/api/sell`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: productId, quantity: parseInt(sellQuantity) }),
     });
 
-    setSelectedId("");
-    setQuantitySold("");
-    router.push("/inventory");
-    };
+    if (res.ok) {
+      alert("Product sold!");
+      setProduct(null);
+      setProductId("");
+      setSellQuantity("");
+      setTotalPrice(0);
+    } else {
+      alert("Failed to sell product.");
+    }
+  };
 
-return (
-  <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow-md text-black">
-    <h1 className="text-2xl font-bold mb-6 text-center">Sell a Product</h1>
+  return (
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow-md">
+      <h1 className="text-2xl font-semibold mb-6 text-center text-black">Sell Product</h1>
+      <input
+        className="border p-2 rounded mb-4 w-full text-black"
+        type="text"
+        placeholder="Enter Product ID"
+        value={productId}
+        onChange={(e) => setProductId(e.target.value)}
+      />
+      <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={fetchProduct}>
+        Fetch Product
+      </button>
 
-    {products.length === 0 ? (
-      <p className="text-center text-gray-600">
-        No products available to sell. Please{" "}
-        <a href="/add-product" className="text-blue-600 underline">
-          add a product
-        </a>{" "}
-        first.
-      </p>
-    ) : (
-      <form onSubmit={handleSell} className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">Select Product</label>
-          <select
-            className="w-full border p-2 rounded text-black"
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            required
-          >
-            <option value="">-- Choose a product --</option>
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name} (Stock: {product.quantity})
-              </option>
-            ))}
-          </select>
-        </div>
+      {product && (
+        <div className="mt-4">
+          <p>Name: {product.name}</p>
+          <p>Unit Price: ₹{product.price}</p>
+          <p>Available Quantity: {product.quantity}</p>
 
-        <div>
-          <label className="block mb-1 font-medium">Quantity Sold</label>
           <input
-            className="w-full border p-2 rounded text-black"
+            className="border p-2 rounded mt-2 w-full text-black"
             type="number"
-            min="1"
-            value={quantitySold}
-            onChange={(e) => setQuantitySold(parseInt(e.target.value))}
-            required
+            placeholder="Quantity to Sell"
+            value={sellQuantity}
+            onChange={(e) => {
+              setSellQuantity(e.target.value);
+              calculateTotal();
+            }}
           />
-        </div>
 
-        <button
-          type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          Record Sale
-        </button>
-      </form>
-    )}
-  </div>
-);
+          <p className="mt-2">Total Price: ₹{totalPrice}</p>
+
+          <button className="bg-red-600 text-white px-4 py-2 mt-4 rounded" onClick={handleSell}>
+            Sell Product
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
