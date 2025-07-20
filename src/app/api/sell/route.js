@@ -16,6 +16,16 @@ export async function POST(req) {
       return new Response("Not enough stock", { status: 400 });
     }
 
+    const totalCost = product.price * quantity;
+
+    // Insert into sales table
+    await pool.query(
+      `INSERT INTO sales (product_id, product_name, quantity_sold, total_cost)
+       VALUES ($1, $2, $3, $4)`,
+      [id, product.name, quantity, totalCost]
+    );
+
+    // Update or delete product
     if (quantity === product.quantity) {
       await pool.query("DELETE FROM products WHERE id = $1", [id]);
     } else {
@@ -25,7 +35,7 @@ export async function POST(req) {
       );
     }
 
-    return new Response("Product sold", { status: 200 });
+    return new Response("Product sold and recorded", { status: 200 });
   } catch (error) {
     console.error("POST /api/sell error:", error);
     return new Response("Server error", { status: 500 });
